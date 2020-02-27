@@ -1,4 +1,4 @@
-{% set version = "48" %}
+{% set version = "49" %}
 
 package:
   name: cromwell
@@ -6,10 +6,10 @@ package:
 
 source:
   - url: https://github.com/broadinstitute/cromwell/releases/download/{{ version }}/cromwell-{{ version }}.jar
-    sha256: c14b4f34f208245bd1a62032d20ad7c6f79cf5a9209f4590645d05f28172155c
+    sha256: 4ff4dbd4ebe128ea51d81ffeeb59fa547f436af775f984770c1dd98569e759c2
     folder: cromwell
   - url: https://github.com/broadinstitute/cromwell/releases/download/{{ version }}/womtool-{{ version }}.jar
-    sha256: d0c5447fb25e7fcd9a5fbdb7fb543941b46ab37cc1741c98ece56084868be936
+    sha256: 7ccc29b6b089f9f4b0fbc252f732fd6e051cd530ca54a1fe0c641991bb92c98f
     folder: womtool
 
 build:
@@ -30,13 +30,13 @@ test:
 
 about:
   home: https://github.com/broadinstitute/cromwell
-  license: "BSD-3-Clause"
-  license_file: "LICENSE.txt"
-  summary: "A Workflow Management System geared towards scientific workflows described in WDL"
+  license: BSD-3-Clause
+  license_file: LICENSE.txt
+  summary: A Workflow Management System geared towards scientific workflows described in WDL
 
 extra:
   recipe-maintainers:
     - notestaff
     - chapmanb
-    - micknudsen 
+    - micknudsen
     - rhpvorderman
