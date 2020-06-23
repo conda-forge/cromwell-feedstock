@@ -11,7 +11,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 # Expected name of the JAR file.
 JAR_NAME = 'cromwell.jar'
@@ -21,7 +21,8 @@ PKG_NAME = 'cromwell'
 DEFAULT_JVM_MEM_OPTS = ('-Xms512m', '-Xmx1g')
 
 
-def jvm_opts(argv, default_mem_opts=DEFAULT_JVM_MEM_OPTS):
+def jvm_opts(argv, default_mem_opts=DEFAULT_JVM_MEM_OPTS
+             ) -> Tuple[List[str], List[str], List[str]]:
     """Constructs a list of Java arguments based on our argument list.
 
 
@@ -34,12 +35,11 @@ def jvm_opts(argv, default_mem_opts=DEFAULT_JVM_MEM_OPTS):
 
     for arg in argv:
         if arg.startswith('-D') or arg.startswith('-XX'):
-            opts_list = prop_opts
+            prop_opts.append(arg)
         elif arg.startswith('-Xm'):
-            opts_list = mem_opts
+            mem_opts.append(arg)
         else:
-            opts_list = pass_args
-        opts_list.append(arg)
+            pass_args.append(arg)
 
     if mem_opts == [] and os.getenv('_JAVA_OPTIONS') is None:
         mem_opts = list(default_mem_opts)
@@ -52,7 +52,7 @@ def main():
     prefix = script.parent.parent      # Script is in prefix/bin/script.
     jar_path = Path(prefix, "share", PKG_NAME, JAR_NAME)
 
-    (mem_opts, prop_opts, pass_args) = jvm_opts(sys.argv[1:])
+    mem_opts, prop_opts, pass_args = jvm_opts(sys.argv[1:])
 
     if pass_args != [] and pass_args[0].startswith('org'):
         jar_arg = '-cp'
