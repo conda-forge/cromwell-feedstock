@@ -61,7 +61,21 @@ def main():
 
     java_args: List[str] = (["java"] + mem_opts + prop_opts +
                             [jar_arg] + [str(jar_path)] + pass_args)
-    sys.exit(subprocess.call(java_args))
+
+    with subprocess.Popen(java_args) as process:
+        # This code is adapted from python's stdlib subprocess.run code.
+        try:
+            process.communicate()  # Waits until the program is finished.
+        except KeyboardInterrupt:
+            # In case of keyboard interrupt we gracefully shutdown Cromwell.
+            process.terminate()
+            process.wait()
+            raise
+        except:
+            process.kill()
+            process.wait()
+        retcode = process.poll()
+    sys.exit(retcode)
 
 
 if __name__ == "__main__":
