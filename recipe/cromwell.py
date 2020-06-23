@@ -7,15 +7,13 @@
 # the peptide-shaker wrapper
 # (https://github.com/bioconda/bioconda-recipes/blob/master/recipes/peptide-shaker/peptide-shaker.py)
 
+import os
 import subprocess
 import sys
-import os
-
 from pathlib import Path
-
-# Expected name of the JAR file.
 from typing import List
 
+# Expected name of the JAR file.
 JAR_NAME = 'cromwell.jar'
 PKG_NAME = 'cromwell'
 
