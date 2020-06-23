@@ -15,7 +15,7 @@ source:
 build:
   # Cannot build on Windows because findutils is not available
   skip: true  # [win]
-  number: 0
+  number: 1
 
 requirements:
   run:
