@@ -18,7 +18,7 @@ JAR_NAME = 'cromwell.jar'
 PKG_NAME = 'cromwell'
 
 # Default options passed to the `java` executable.
-DEFAULT_JVM_MEM_OPTS = ['-Xms512m', '-Xmx1g']
+DEFAULT_JVM_MEM_OPTS = ('-Xms512m', '-Xmx1g')
 
 
 def real_dirname(in_path):
@@ -39,6 +39,7 @@ def java_executable():
     else:
         # Use Java installed with Anaconda to ensure correct version
         return os.path.join(env_prefix, 'bin', 'java')
+
 
 def jvm_opts(argv, default_mem_opts=DEFAULT_JVM_MEM_OPTS):
     """Constructs a list of Java arguments based on our argument list.
@@ -61,9 +62,9 @@ def jvm_opts(argv, default_mem_opts=DEFAULT_JVM_MEM_OPTS):
         opts_list.append(arg)
 
     if mem_opts == [] and getenv('_JAVA_OPTIONS') is None:
-        mem_opts = default_mem_opts
+        mem_opts = list(default_mem_opts)
 
-    return (mem_opts, prop_opts, pass_args)
+    return mem_opts, prop_opts, pass_args
 
 
 def main():
