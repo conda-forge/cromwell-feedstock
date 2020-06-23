@@ -48,7 +48,7 @@ def jvm_opts(argv, default_mem_opts=DEFAULT_JVM_MEM_OPTS
 
 
 def main():
-    script = Path(sys.argv[0])
+    script = Path(sys.argv[0]).resolve()
     prefix = script.parent.parent      # Script is in prefix/bin/script.
     jar_path = Path(prefix, "share", PKG_NAME, JAR_NAME)
 
