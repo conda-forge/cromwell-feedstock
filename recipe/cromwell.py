@@ -10,10 +10,12 @@
 import subprocess
 import sys
 import os
-from os import access, getenv, path, X_OK
 
+from pathlib import Path
 
 # Expected name of the JAR file.
+from typing import List
+
 JAR_NAME = 'cromwell.jar'
 PKG_NAME = 'cromwell'
 
@@ -21,24 +23,25 @@ PKG_NAME = 'cromwell'
 DEFAULT_JVM_MEM_OPTS = ('-Xms512m', '-Xmx1g')
 
 
-def real_dirname(in_path):
+def jar_dir_from_bin_file(in_path: Path) -> Path:
     """Returns the path to the JAR file"""
-    realPath = os.path.dirname(os.path.realpath(in_path))
-    newPath = os.path.realpath(os.path.join(realPath, "..", "share", PKG_NAME))
-    return newPath
+    full_path = in_path.resolve()  # x/x/bin/my_script
+    # go to x/x/share/PKG_name
+    jar_path = full_path.parent.parent / "share" / PKG_NAME
+    return jar_path
 
 
-def java_executable():
+def java_executable() -> Path:
     """Returns the name of the Java executable."""
-    java_home = getenv('JAVA_HOME')
-    java_bin = path.join('bin', 'java')
-    env_prefix = os.path.dirname(os.path.dirname(real_dirname(sys.argv[0])))
+    java_home = os.getenv('JAVA_HOME')
+    java_bin = Path('bin', 'java')
+    env_prefix = jar_dir_from_bin_file(Path(sys.argv[0])).parent.parent
 
-    if java_home and access(os.path.join(java_home, java_bin), X_OK):
-        return os.path.join(java_home, java_bin)
+    if java_home and os.access(str(Path(java_home, java_bin)), os.X_OK):
+        return Path(java_home, java_bin)
     else:
         # Use Java installed with Anaconda to ensure correct version
-        return os.path.join(env_prefix, 'bin', 'java')
+        return env_prefix / 'bin' / 'java'
 
 
 def jvm_opts(argv, default_mem_opts=DEFAULT_JVM_MEM_OPTS):
@@ -61,7 +64,7 @@ def jvm_opts(argv, default_mem_opts=DEFAULT_JVM_MEM_OPTS):
             opts_list = pass_args
         opts_list.append(arg)
 
-    if mem_opts == [] and getenv('_JAVA_OPTIONS') is None:
+    if mem_opts == [] and os.getenv('_JAVA_OPTIONS') is None:
         mem_opts = list(default_mem_opts)
 
     return mem_opts, prop_opts, pass_args
@@ -69,7 +72,7 @@ def jvm_opts(argv, default_mem_opts=DEFAULT_JVM_MEM_OPTS):
 
 def main():
     java = java_executable()
-    jar_dir = real_dirname(sys.argv[0])
+    jar_dir = jar_dir_from_bin_file(Path(sys.argv[0]))
     (mem_opts, prop_opts, pass_args) = jvm_opts(sys.argv[1:])
 
     if pass_args != [] and pass_args[0].startswith('org'):
@@ -77,8 +80,9 @@ def main():
     else:
         jar_arg = '-jar'
 
-    jar_path = path.join(jar_dir, JAR_NAME)
-    java_args = [java] + mem_opts + prop_opts + [jar_arg] + [jar_path] + pass_args
+    jar_path = jar_dir / JAR_NAME
+    java_args: List[str] = ([java] + mem_opts + prop_opts +
+                            [jar_arg] + [str(jar_path)] + pass_args)
     sys.exit(subprocess.call(java_args))
 
 
