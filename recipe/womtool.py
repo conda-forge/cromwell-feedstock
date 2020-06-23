@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 #
 # Wrapper script for invoking the jar.
 #
@@ -10,8 +10,6 @@
 import os
 import subprocess
 import sys
-from pathlib import Path
-from typing import List, Tuple
 
 # Expected name of the JAR file.
 JAR_NAME = 'womtool.jar'
@@ -21,8 +19,7 @@ PKG_NAME = 'cromwell'
 DEFAULT_JVM_MEM_OPTS = ('-Xms512m', '-Xmx1g')
 
 
-def jvm_opts(argv, default_mem_opts=DEFAULT_JVM_MEM_OPTS
-             ) -> Tuple[List[str], List[str], List[str]]:
+def jvm_opts(argv, default_mem_opts=DEFAULT_JVM_MEM_OPTS):
     """Constructs a list of Java arguments based on our argument list.
 
 
@@ -48,9 +45,10 @@ def jvm_opts(argv, default_mem_opts=DEFAULT_JVM_MEM_OPTS
 
 
 def main():
-    script = Path(sys.argv[0]).resolve()  # Handle symlinks and .. dirs.
-    prefix = script.parent.parent      # Script is in prefix/bin/script.
-    jar_path = Path(prefix, "share", PKG_NAME, JAR_NAME)
+    script = os.path.realpath(sys.argv[0])  # Handle symlinks and .. dirs.
+    # Script is in prefix/bin/script.
+    prefix = os.path.dirname(os.path.dirname(script))
+    jar_path = os.path.join(prefix, "share", PKG_NAME, JAR_NAME)
 
     mem_opts, prop_opts, pass_args = jvm_opts(sys.argv[1:])
 
@@ -59,8 +57,8 @@ def main():
     else:
         jar_arg = '-jar'
 
-    java_args: List[str] = (["java"] + mem_opts + prop_opts +
-                            [jar_arg] + [str(jar_path)] + pass_args)
+    java_args = (["java"] + mem_opts + prop_opts + [jar_arg] + [jar_path] +
+                 pass_args)
     sys.exit(subprocess.call(java_args))
 
 
