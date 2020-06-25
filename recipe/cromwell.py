@@ -81,6 +81,7 @@ def main():
         except:
             process.kill()
             process.wait()
+            raise
         retcode = process.poll()
     sys.exit(retcode)
 
