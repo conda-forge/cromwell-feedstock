@@ -78,7 +78,6 @@ def main():
             # In case of keyboard interrupt we gracefully shutdown Cromwell.
             process.terminate()
             process.wait()
-            raise
         except:
             process.kill()
             process.wait()
