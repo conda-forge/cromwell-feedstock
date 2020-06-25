@@ -19,6 +19,16 @@ PKG_NAME = 'cromwell'
 DEFAULT_JVM_MEM_OPTS = ('-Xms512m', '-Xmx1g')
 
 
+def java_executable(env_prefix):
+    """Returns the name of the Java executable."""
+    java_home = os.getenv('JAVA_HOME')
+    if java_home:
+        java_home_bin = os.path.join(java_home, 'bin', 'java')
+        if os.access(java_home_bin, os.X_OK):
+            return java_home_bin
+    return os.path.join(env_prefix, 'bin', 'java')
+
+
 def jvm_opts(argv, default_mem_opts=DEFAULT_JVM_MEM_OPTS):
     """Constructs a list of Java arguments based on our argument list.
 
@@ -48,6 +58,7 @@ def main():
     script = os.path.realpath(sys.argv[0])  # Handle symlinks and .. dirs.
     # Script is in prefix/bin/script.
     prefix = os.path.dirname(os.path.dirname(script))
+    java = java_executable(prefix)  # Make sure java from prefix (not system) is used.
     jar_path = os.path.join(prefix, "share", PKG_NAME, JAR_NAME)
 
     mem_opts, prop_opts, pass_args = jvm_opts(sys.argv[1:])
@@ -57,8 +68,7 @@ def main():
     else:
         jar_arg = '-jar'
 
-    java_args = (["java"] + mem_opts + prop_opts + [jar_arg] + [jar_path] +
-                 pass_args)
+    java_args = [java] + mem_opts + prop_opts + [jar_arg] + [jar_path] + pass_args
     sys.exit(subprocess.call(java_args))
 
 
