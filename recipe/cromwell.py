@@ -7,38 +7,27 @@
 # the peptide-shaker wrapper
 # (https://github.com/bioconda/bioconda-recipes/blob/master/recipes/peptide-shaker/peptide-shaker.py)
 
+import os
 import subprocess
 import sys
-import os
-from os import access, getenv, path, X_OK
-
 
 # Expected name of the JAR file.
 JAR_NAME = 'cromwell.jar'
 PKG_NAME = 'cromwell'
 
 # Default options passed to the `java` executable.
-DEFAULT_JVM_MEM_OPTS = ['-Xms512m', '-Xmx1g']
+DEFAULT_JVM_MEM_OPTS = ('-Xms512m', '-Xmx1g')
 
 
-def real_dirname(in_path):
-    """Returns the path to the JAR file"""
-    realPath = os.path.dirname(os.path.realpath(in_path))
-    newPath = os.path.realpath(os.path.join(realPath, "..", "share", PKG_NAME))
-    return newPath
-
-
-def java_executable():
+def java_executable(env_prefix):
     """Returns the name of the Java executable."""
-    java_home = getenv('JAVA_HOME')
-    java_bin = path.join('bin', 'java')
-    env_prefix = os.path.dirname(os.path.dirname(real_dirname(sys.argv[0])))
+    java_home = os.getenv('JAVA_HOME')
+    if java_home:
+        java_home_bin = os.path.join(java_home, 'bin', 'java')
+        if os.access(java_home_bin, os.X_OK):
+            return java_home_bin
+    return os.path.join(env_prefix, 'bin', 'java')
 
-    if java_home and access(os.path.join(java_home, java_bin), X_OK):
-        return os.path.join(java_home, java_bin)
-    else:
-        # Use Java installed with Anaconda to ensure correct version
-        return os.path.join(env_prefix, 'bin', 'java')
 
 def jvm_opts(argv, default_mem_opts=DEFAULT_JVM_MEM_OPTS):
     """Constructs a list of Java arguments based on our argument list.
@@ -53,32 +42,48 @@ def jvm_opts(argv, default_mem_opts=DEFAULT_JVM_MEM_OPTS):
 
     for arg in argv:
         if arg.startswith('-D') or arg.startswith('-XX'):
-            opts_list = prop_opts
+            prop_opts.append(arg)
         elif arg.startswith('-Xm'):
-            opts_list = mem_opts
+            mem_opts.append(arg)
         else:
-            opts_list = pass_args
-        opts_list.append(arg)
+            pass_args.append(arg)
 
-    if mem_opts == [] and getenv('_JAVA_OPTIONS') is None:
-        mem_opts = default_mem_opts
+    if mem_opts == [] and os.getenv('_JAVA_OPTIONS') is None:
+        mem_opts = list(default_mem_opts)
 
-    return (mem_opts, prop_opts, pass_args)
+    return mem_opts, prop_opts, pass_args
 
 
 def main():
-    java = java_executable()
-    jar_dir = real_dirname(sys.argv[0])
-    (mem_opts, prop_opts, pass_args) = jvm_opts(sys.argv[1:])
+    script = os.path.realpath(sys.argv[0])  # Handle symlinks and .. dirs.
+    # Script is in prefix/bin/script.
+    prefix = os.path.dirname(os.path.dirname(script))
+    java = java_executable(prefix)  # Make sure java from prefix (not system) is used.
+    jar_path = os.path.join(prefix, "share", PKG_NAME, JAR_NAME)
+
+    mem_opts, prop_opts, pass_args = jvm_opts(sys.argv[1:])
 
     if pass_args != [] and pass_args[0].startswith('org'):
         jar_arg = '-cp'
     else:
         jar_arg = '-jar'
 
-    jar_path = path.join(jar_dir, JAR_NAME)
     java_args = [java] + mem_opts + prop_opts + [jar_arg] + [jar_path] + pass_args
-    sys.exit(subprocess.call(java_args))
+
+    with subprocess.Popen(java_args) as process:
+        # This code is adapted from python's stdlib subprocess.run code.
+        try:
+            process.communicate()  # Waits until the program is finished.
+        except KeyboardInterrupt:
+            # In case of keyboard interrupt we gracefully shutdown Cromwell.
+            process.terminate()
+            process.wait()
+        except:
+            process.kill()
+            process.wait()
+            raise
+        retcode = process.poll()
+    sys.exit(retcode)
 
 
 if __name__ == "__main__":
