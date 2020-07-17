@@ -5,7 +5,7 @@ Home: https://github.com/broadinstitute/cromwell
 
 Package license: BSD-3-Clause
 
-Feedstock license: BSD 3-Clause
+Feedstock license: BSD-3-Clause
 
 Summary: A Workflow Management System geared towards scientific workflows described in WDL
 
