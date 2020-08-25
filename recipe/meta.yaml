@@ -1,4 +1,4 @@
-{% set version = "52" %}
+{% set version = "53" %}
 
 package:
   name: cromwell
@@ -6,16 +6,16 @@ package:
 
 source:
   - url: https://github.com/broadinstitute/cromwell/releases/download/{{ version }}/cromwell-{{ version }}.jar
-    sha256: 4b3195420d59d7ea129c3d690c9a1cc323403d9c85965ed7c2a37144af13ffa1
+    sha256: e400087ed0807b68fac87769cf742ad46195c13f5bf96a7a68a0ff099d2f169e
     folder: cromwell
   - url: https://github.com/broadinstitute/cromwell/releases/download/{{ version }}/womtool-{{ version }}.jar
-    sha256: 67331af5a4850c5c04e521682c6618c93c475c041f254121849ddb4cffde5c16
+    sha256: 295b7c9345f8572a781e11d7bd93b5b22888d1cb82fc981ed3d8b95d7f86f664
     folder: womtool
 
 build:
   # Cannot build on Windows because findutils is not available
   skip: true  # [win]
-  number: 1
+  number: 0
 
 requirements:
   run:
