@@ -22,7 +22,7 @@ requirements:
     - openjdk >=8,<9
     - python
     - findutils
-    - subprocess32  # [py27]
+    - subprocess32  # [py==27]
 
 test:
   commands:
