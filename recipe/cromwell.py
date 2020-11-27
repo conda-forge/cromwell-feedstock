@@ -11,6 +11,10 @@ import os
 import subprocess
 import sys
 
+if sys.version_info.major == 2:
+    # Backported subprocess is needed as it makes Popen a context manager.
+    import subprocess32 as subprocess
+
 # Expected name of the JAR file.
 JAR_NAME = 'cromwell.jar'
 PKG_NAME = 'cromwell'
