@@ -19,7 +19,7 @@ build:
 
 requirements:
   run:
-    - openjdk >=8,<9
+    - openjdk >=11,<12
     - python
     - findutils
     - subprocess32  # [py==27]
