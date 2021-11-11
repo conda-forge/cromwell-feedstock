@@ -1,4 +1,4 @@
-{% set version = "69" %}
+{% set version = "71" %}
 
 package:
   name: cromwell
@@ -6,10 +6,10 @@ package:
 
 source:
   - url: https://github.com/broadinstitute/cromwell/releases/download/{{ version }}/cromwell-{{ version }}.jar
-    sha256: b4db18eda06107c3e9675ff6362360f28142fa3ef0e9400f278016a1573c7094
+    sha256: 95523cece782cb4c640fbf2be1ef8c2a00bf7f11e69c5d1b4b135116518ed538
     folder: cromwell
   - url: https://github.com/broadinstitute/cromwell/releases/download/{{ version }}/womtool-{{ version }}.jar
-    sha256: a1f4eca078f1ef59ea017e9a60dd30faa425ff19549e275dd8b037bf4a64c259
+    sha256: 002d61175e2d83d7e2ccf9f72a4d525ab6f5b082817d7cb5fb861ed0f9e5ac52
     folder: womtool
 
 build:
