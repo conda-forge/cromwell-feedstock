@@ -27,6 +27,10 @@ test:
   commands:
     - cromwell --version 2>&1 | grep "cromwell"
     - womtool --help 2>&1 | grep "Usage"
+    - womtool validate tests/test-wdl.wdl
+    - cromwell run tests/test-wdl.wdl
+  files:
+    - "tests"
 
 about:
   home: https://github.com/broadinstitute/cromwell
